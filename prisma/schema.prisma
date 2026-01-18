@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  fullName  String
+  email     String   @unique
+  password  String
+  address   String?  @unique
+  walletType  String?
+  balance   Float    @default(0.0) // Internal balance in ETH/USD
+  role      String   @default("USER") // USER or ADMIN
+  createdAt DateTime @default(now())
+  
+  nftsOwned   NFT[] @relation("Owner")
+  nftsCreated NFT[] @relation("Creator")
+  
+  sentTransactions     Transaction[] @relation("Sender")
+  receivedTransactions Transaction[] @relation("Receiver")
+}
+
+model NFT {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String
+  price       Float?   // Listing price
+  isListed    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  ownerId   String
+  owner     User   @relation("Owner", fields: [ownerId], references: [id])
+  
+  creatorId String
+  creator   User   @relation("Creator", fields: [creatorId], references: [id])
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  type      String   // MINT, BUY, SELL, CREDIT
+  amount    Float
+  createdAt DateTime @default(now())
+
+  fromId    String?
+  from      User?   @relation("Sender", fields: [fromId], references: [id])
+  
+  toId      String?
+  to        User?   @relation("Receiver", fields: [toId], references: [id])
+
+  nftId     String?
+  nft       NFT?    @relation(fields: [nftId], references: [id])
+}
