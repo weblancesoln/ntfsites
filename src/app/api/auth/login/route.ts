@@ -6,6 +6,8 @@ import { cookies } from 'next/headers';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-this-in-prod';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
     try {
         const { identifier, password } = await req.json(); // identifier is email or username

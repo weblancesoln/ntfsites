@@ -5,7 +5,9 @@ import prisma from '@/lib/prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-this-in-prod';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
     try {
         const cookieStore = await cookies();
         const token = cookieStore.get('auth-token');
