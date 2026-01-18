@@ -9,14 +9,19 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'Address required' }, { status: 400 });
         }
 
-        // Upsert User
-        const user = await prisma.user.upsert({
+        // Check if user exists
+        const existingUser = await prisma.user.findUnique({
             where: { address },
-            update: { balance: { increment: 10 } },
-            create: {
-                address,
-                balance: 10
-            },
+        });
+
+        if (!existingUser) {
+            return NextResponse.json({ success: false, message: 'User not found. Please register first.' }, { status: 404 });
+        }
+
+        // Update User Balance
+        const user = await prisma.user.update({
+            where: { address },
+            data: { balance: { increment: 10 } },
         });
 
         // Record Transaction

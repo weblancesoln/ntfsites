@@ -6,7 +6,7 @@ import { NFTCard } from '@/components/NFTCard';
 import { motion } from 'framer-motion';
 
 interface TrendingProps {
-    nfts: { id: string; title: string; price: number | null; imageUrl: string; owner: { address: string } }[];
+    nfts: { id: string; title: string; price: number | null; imageUrl: string; owner: { address?: string | null; username?: string } }[];
 }
 
 // Fallback high-quality mock data for visual impact
@@ -16,28 +16,28 @@ const MOCK_NFTS = [
         title: 'Cosmic Perspective #42',
         price: 2.5,
         imageUrl: 'https://images.unsplash.com/photo-1634986666676-ec8fd927c23d?w=800&auto=format&fit=crop&q=60',
-        owner: { address: '0x123...456' }
+        owner: { address: '0x123...456', username: 'CryptoKing' }
     },
     {
         id: 'mock-2',
         title: 'Neon Genesis',
         price: 1.8,
         imageUrl: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=60',
-        owner: { address: '0xabc...def' }
+        owner: { address: '0xabc...def', username: 'NeonArtist' }
     },
     {
         id: 'mock-3',
         title: 'Digital Dreams',
         price: 4.2,
         imageUrl: 'https://images.unsplash.com/photo-1620321023374-d1a68fddadb3?w=800&auto=format&fit=crop&q=60',
-        owner: { address: '0x789...012' }
+        owner: { address: '0x789...012', username: 'DreamWeaver' }
     },
     {
         id: 'mock-4',
         title: 'Cyber Punk 2077',
         price: 3.1,
         imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60',
-        owner: { address: '0xeff...333' }
+        owner: { address: '0xeff...333', username: 'CyberPunk' }
     }
 ];
 
@@ -100,6 +100,7 @@ export function Trending({ nfts }: TrendingProps) {
                                 price={nft.price}
                                 imageUrl={nft.imageUrl}
                                 ownerAddress={nft.owner.address}
+                                ownerName={nft.owner.username}
                             />
                         </motion.div>
                     ))}

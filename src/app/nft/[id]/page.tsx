@@ -38,7 +38,10 @@ export default async function NFTDetail({ params }: Props) {
                             <div>
                                 <p className="text-xs text-[hsl(var(--text-secondary))]">Creator</p>
                                 <p className="text-sm font-mono text-[hsl(var(--primary))]">
-                                    {nft.creator.address.slice(0, 6)}...{nft.creator.address.slice(-4)}
+                                    {nft.creator.address
+                                        ? `${nft.creator.address.slice(0, 6)}...${nft.creator.address.slice(-4)}`
+                                        : nft.creator.username
+                                    }
                                 </p>
                             </div>
                         </div>
@@ -47,7 +50,10 @@ export default async function NFTDetail({ params }: Props) {
                             <div>
                                 <p className="text-xs text-[hsl(var(--text-secondary))]">Current Owner</p>
                                 <p className="text-sm font-mono text-[hsl(var(--primary))]">
-                                    {nft.owner.address.slice(0, 6)}...{nft.owner.address.slice(-4)}
+                                    {nft.owner.address
+                                        ? `${nft.owner.address.slice(0, 6)}...${nft.owner.address.slice(-4)}`
+                                        : nft.owner.username
+                                    }
                                 </p>
                             </div>
                         </div>
@@ -63,7 +69,7 @@ export default async function NFTDetail({ params }: Props) {
                             <BuyButton
                                 nftId={nft.id}
                                 price={nft.price}
-                                ownerAddress={nft.owner.address}
+                                ownerAddress={nft.owner.address || nft.owner.id}
                             />
                         )}
                     </div>

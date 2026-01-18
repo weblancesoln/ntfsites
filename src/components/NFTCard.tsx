@@ -8,10 +8,11 @@ interface NFTProps {
     title: string;
     price: number | null;
     imageUrl: string;
-    ownerAddress: string;
+    ownerAddress?: string | null;
+    ownerName?: string;
 }
 
-export function NFTCard({ id, title, price, imageUrl, ownerAddress }: NFTProps) {
+export function NFTCard({ id, title, price, imageUrl, ownerAddress, ownerName }: NFTProps) {
     return (
         <Link href={`/nft/${id}`} className="group block h-full">
             <div className="glass-card rounded-3xl overflow-hidden h-full flex flex-col transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.3)] border border-white/10 hover:border-primary/50 relative">
@@ -44,7 +45,10 @@ export function NFTCard({ id, title, price, imageUrl, ownerAddress }: NFTProps) 
                 <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 bg-gradient-to-t from-black via-black/80 to-transparent">
                     <h3 className="text-xl font-bold mb-1 w-full truncate text-white group-hover:text-primary transition-colors drop-shadow-md">{title}</h3>
                     <p className="text-sm text-white/70 mb-4 truncate font-medium">
-                        @{ownerAddress.slice(0, 6)}...{ownerAddress.slice(-4)}
+                        @{ownerAddress
+                            ? `${ownerAddress.slice(0, 6)}...${ownerAddress.slice(-4)}`
+                            : ownerName
+                        }
                     </p>
 
                     <div className="flex items-center justify-between pt-4 border-t border-white/10">
