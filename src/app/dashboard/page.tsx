@@ -212,7 +212,7 @@ export default function Dashboard() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {user?.nftsOwned?.map((nft) => (
+                        {user?.nftsOwned?.map((nft: any) => (
                             <NFTCard
                                 key={nft.id}
                                 id={nft.id}
@@ -238,7 +238,7 @@ export default function Dashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {user?.receivedTransactions?.map((tx) => (
+                            {user?.receivedTransactions?.map((tx: any) => (
                                 <tr key={tx.id} className="border-t border-[hsl(var(--border))]">
                                     <td className="p-4">
                                         <span className={`px-2 py-1 rounded text-xs font-bold ${tx.type === 'DEPOSIT' || tx.type === 'SALE' ? 'bg-[hsl(var(--success))]/20 text-[hsl(var(--success))]' : 'bg-[hsl(var(--secondary))]/20 text-[hsl(var(--secondary))]'

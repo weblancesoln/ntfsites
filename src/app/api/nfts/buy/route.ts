@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Transaction logic using Prisma transaction to ensure atomicity
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx: any) => {
             // 1. Get NFT and Owner
             const nft = await tx.nFT.findUnique({
                 where: { id: nftId },

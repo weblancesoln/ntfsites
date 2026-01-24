@@ -10,7 +10,7 @@ export default async function AdminDashboard() {
     });
 
     const totalUsers = users.length;
-    const totalBalance = users.reduce((acc, u) => acc + u.balance, 0);
+    const totalBalance = users.reduce((acc: number, u: { balance: number }) => acc + u.balance, 0);
 
     return (
         <div className="container py-12">
@@ -47,7 +47,7 @@ export default async function AdminDashboard() {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(user => (
+                        {users.map((user: any) => (
                             <tr key={user.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors group">
                                 <td className="py-5 px-2">
                                     <div className="flex flex-col">
