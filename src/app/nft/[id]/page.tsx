@@ -11,10 +11,16 @@ interface Props {
 export default async function NFTDetail({ params }: Props) {
     const { id } = await params;
 
-    const nft = await prisma.nFT.findUnique({
-        where: { id },
-        include: { owner: true, creator: true }
-    });
+    let nft;
+    try {
+        nft = await prisma.nFT.findUnique({
+            where: { id },
+            include: { owner: true, creator: true }
+        });
+    } catch (error) {
+        console.error('NFT detail fetch error:', error);
+        return notFound();
+    }
 
     if (!nft) return notFound();
 

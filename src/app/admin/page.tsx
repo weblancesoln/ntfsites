@@ -4,10 +4,16 @@ import { CreditForm } from './CreditForm';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
-    const users = await prisma.user.findMany({
-        orderBy: { createdAt: 'desc' },
-        include: { _count: { select: { nftsOwned: true, nftsCreated: true } } }
-    });
+    let users = [];
+    try {
+        users = await prisma.user.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: { _count: { select: { nftsOwned: true, nftsCreated: true } } }
+        });
+    } catch (error) {
+        console.error('Admin dashboard data fetch error:', error);
+        users = [];
+    }
 
     const totalUsers = users.length;
     const totalBalance = users.reduce((acc: number, u: { balance: number }) => acc + u.balance, 0);

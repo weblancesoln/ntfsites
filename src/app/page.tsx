@@ -8,12 +8,19 @@ import { Footer } from '@/components/Footer';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const nfts = await prisma.nFT.findMany({
-    where: { isListed: true },
-    include: { owner: true },
-    orderBy: { createdAt: 'desc' },
-    take: 8 // Limit to 8 trending items for the home page
-  });
+  let nfts = [];
+  try {
+    nfts = await prisma.nFT.findMany({
+      where: { isListed: true },
+      include: { owner: true },
+      orderBy: { createdAt: 'desc' },
+      take: 8
+    });
+  } catch (error) {
+    console.error('Home page data fetch error:', error);
+    // Fallback to empty list so the page still renders with mock data
+    nfts = [];
+  }
 
   return (
     <main className="min-h-screen">
