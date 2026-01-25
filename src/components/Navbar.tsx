@@ -61,9 +61,6 @@ export function Navbar() {
                     <Link href="/dashboard" className={`font-medium hover:text-[hsl(var(--primary))] transition-colors ${isActive('/dashboard')}`}>
                         Dashboard
                     </Link>
-                    <Link href="/admin" className={`font-medium hover:text-[hsl(var(--primary))] transition-colors ${isActive('/admin')}`}>
-                        Admin
-                    </Link>
                 </div>
 
                 <div className="flex items-center gap-4">
