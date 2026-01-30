@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { CreditForm } from './CreditForm';
+import { CopyAddress } from '@/components/CopyAddress';
 
 interface UserWithCount {
     id: string;
@@ -79,9 +80,11 @@ export default async function AdminDashboard() {
                                     </span>
                                 </td>
                                 <td className="py-5 px-2">
-                                    <code className="text-xs text-white/60 bg-black/20 px-2 py-1 rounded">
-                                        {user.address ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}` : 'Manual Account'}
-                                    </code>
+                                    {user.address ? (
+                                        <CopyAddress address={user.address} />
+                                    ) : (
+                                        <span className="text-xs text-muted-foreground italic">Manual Account</span>
+                                    )}
                                 </td>
                                 <td className="py-5 px-2">
                                     <span className="font-mono font-bold text-primary">{user.balance.toFixed(4)} ETH</span>
