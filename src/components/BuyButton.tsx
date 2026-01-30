@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
+interface User {
+    id: string;
+    address: string | null;
+}
+
 interface BuyButtonProps {
     nftId: string;
     price: number;
@@ -13,7 +18,7 @@ interface BuyButtonProps {
 
 export function BuyButton({ nftId, price, ownerAddress }: BuyButtonProps) {
     const router = useRouter();
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
     const [buying, setBuying] = useState(false);
 

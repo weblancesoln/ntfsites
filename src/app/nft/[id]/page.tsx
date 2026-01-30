@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { BuyButton } from '@/components/BuyButton';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,13 @@ export default async function NFTDetail({ params }: Props) {
                 {/* Image */}
                 <div className="relative aspect-square rounded-2xl overflow-hidden border border-[hsl(var(--border))] bg-[hsl(var(--surface))]">
                     {nft.imageUrl ? (
-                        <img src={nft.imageUrl} alt={nft.title} className="w-full h-full object-cover" />
+                        <Image
+                            src={nft.imageUrl}
+                            alt={nft.title}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                        />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">No Image</div>
                     )}

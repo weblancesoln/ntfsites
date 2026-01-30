@@ -1,6 +1,18 @@
 import prisma from '@/lib/prisma';
 import { CreditForm } from './CreditForm';
 
+interface UserWithCount {
+    id: string;
+    fullName: string;
+    username: string;
+    walletType: string | null;
+    address: string | null;
+    balance: number;
+    _count: {
+        nftsOwned: number;
+    };
+}
+
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
@@ -53,7 +65,7 @@ export default async function AdminDashboard() {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map((user: any) => (
+                        {users.map((user: UserWithCount) => (
                             <tr key={user.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors group">
                                 <td className="py-5 px-2">
                                     <div className="flex flex-col">

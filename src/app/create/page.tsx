@@ -4,10 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Upload, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+
+interface User {
+    id: string;
+    username: string;
+    email: string;
+}
 
 export default function CreateNFT() {
     const router = useRouter();
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
 
     const [file, setFile] = useState<File | null>(null);
@@ -80,9 +87,9 @@ export default function CreateNFT() {
                 const errorData = await createRes.json();
                 throw new Error(errorData.message || 'Creation failed');
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            alert(error.message || 'Something went wrong!');
+            alert(error instanceof Error ? error.message : 'Something went wrong!');
         } finally {
             setIsSubmitting(false);
         }
@@ -123,7 +130,14 @@ export default function CreateNFT() {
                 <div className="glass-card p-4 rounded-2xl border border-white/10 relative overflow-hidden group">
                     <div className={`border-2 border-dashed border-white/10 rounded-xl transition-all duration-300 ${preview ? 'p-2' : 'p-12'} flex flex-col items-center justify-center text-center hover:border-primary/50 relative min-h-[300px]`}>
                         {preview ? (
-                            <img src={preview} alt="Preview" className="max-h-[400px] w-full object-contain rounded-lg" />
+                            <Image
+                                src={preview}
+                                alt="Preview"
+                                width={400}
+                                height={400}
+                                className="max-h-[400px] w-full object-contain rounded-lg"
+                                unoptimized
+                            />
                         ) : (
                             <>
                                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110">

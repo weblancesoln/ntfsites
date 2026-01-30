@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import prisma from '@/lib/prisma';
 
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
         try {
             const decoded = jwt.verify(token.value, JWT_SECRET) as { userId: string };
             buyerId = decoded.userId;
-        } catch (err) {
+        } catch {
             return NextResponse.json({ success: false, message: 'Invalid session' }, { status: 401 });
         }
 
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Transaction logic using Prisma transaction to ensure atomicity
-        const result = await prisma.$transaction(async (tx: any) => {
+        const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // 1. Get NFT and Owner
             const nft = await tx.nFT.findUnique({
                 where: { id: nftId },

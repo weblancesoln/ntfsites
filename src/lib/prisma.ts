@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client'
 import { withAccelerate } from '@prisma/extension-accelerate'
 
 const prismaClientSingleton = () => {
+    if (!process.env.DATABASE_URL) {
+        throw new Error('DATABASE_URL is not defined in the environment variables');
+    }
     return new PrismaClient().$extends(withAccelerate())
 }
 

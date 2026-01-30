@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface NFTProps {
     id: string;
@@ -21,10 +22,12 @@ export function NFTCard({ id, title, price, imageUrl, ownerAddress, ownerName }:
                 <div className="relative aspect-[4/5] overflow-hidden bg-muted">
                     {imageUrl ? (
                         <>
-                            <img
+                            <Image
                                 src={imageUrl}
                                 alt={title}
-                                className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                unoptimized
                             />
                             {/* Gradient Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300" />

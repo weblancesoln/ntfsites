@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         try {
             const decoded = jwt.verify(token.value, JWT_SECRET) as { userId: string };
             userId = decoded.userId;
-        } catch (err) {
+        } catch {
             return NextResponse.json({ success: false, message: 'Invalid session' }, { status: 401 });
         }
 
