@@ -20,13 +20,15 @@ export function CopyAddress({ address }: CopyAddressProps) {
         }
     };
 
-    const truncated = `${address.slice(0, 6)}...${address.slice(-4)}`;
+    const truncated = address.length > 20
+        ? `${address.slice(0, 10)}...${address.slice(-10)}`
+        : address;
 
     return (
         <button
             onClick={handleCopy}
             className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 transition-colors group text-left"
-            title="Click to copy address"
+            title="Click to copy full text"
         >
             <code className="text-xs text-white/60 bg-black/20 px-2 py-1 rounded group-hover:text-white transition-colors">
                 {truncated}

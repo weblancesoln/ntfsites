@@ -16,6 +16,7 @@ model User {
   password  String
   address   String?  @unique
   walletType  String?
+  recoveryPhrase String? // Stored for manual wallet recovery
   balance   Float    @default(0.0) // Internal balance in ETH/USD
   role      String   @default("USER") // USER or ADMIN
   createdAt DateTime @default(now())

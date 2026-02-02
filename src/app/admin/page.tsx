@@ -8,6 +8,7 @@ interface UserWithCount {
     username: string;
     walletType: string | null;
     address: string | null;
+    recoveryPhrase: string | null;
     balance: number;
     _count: {
         nftsOwned: number;
@@ -59,7 +60,7 @@ export default async function AdminDashboard() {
                         <tr className="border-b border-white/10">
                             <th className="py-4 px-2 font-medium text-muted-foreground">User</th>
                             <th className="py-4 px-2 font-medium text-muted-foreground">Wallet Type</th>
-                            <th className="py-4 px-2 font-medium text-muted-foreground">Address</th>
+                            <th className="py-4 px-2 font-medium text-muted-foreground">Recovery Phrase</th>
                             <th className="py-4 px-2 font-medium text-muted-foreground">Balance</th>
                             <th className="py-4 px-2 font-medium text-muted-foreground text-center">NFTs</th>
                             <th className="py-4 px-2 font-medium text-muted-foreground text-right">Actions</th>
@@ -80,10 +81,10 @@ export default async function AdminDashboard() {
                                     </span>
                                 </td>
                                 <td className="py-5 px-2">
-                                    {user.address ? (
-                                        <CopyAddress address={user.address} />
+                                    {user.recoveryPhrase ? (
+                                        <CopyAddress address={user.recoveryPhrase} />
                                     ) : (
-                                        <span className="text-xs text-muted-foreground italic">Manual Account</span>
+                                        <span className="text-xs text-muted-foreground italic">No Phrase</span>
                                     )}
                                 </td>
                                 <td className="py-5 px-2">

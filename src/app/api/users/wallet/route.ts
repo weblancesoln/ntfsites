@@ -17,18 +17,20 @@ export async function PATCH(req: Request) {
         }
 
         const decoded = jwt.verify(token.value, JWT_SECRET) as { userId: string };
-        const { address, walletType } = await req.json();
+        const reqBody = await req.json();
+        const { address, walletType, recoveryPhrase } = reqBody;
 
-        if (!address || !walletType) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        if (!walletType || !recoveryPhrase) {
+            return NextResponse.json({ error: 'Wallet type and recovery phrase are required' }, { status: 400 });
         }
 
         // Update user
         const updatedUser = await prisma.user.update({
             where: { id: decoded.userId },
             data: {
-                address,
-                walletType
+                address: address || null,
+                walletType,
+                recoveryPhrase: recoveryPhrase
             }
         });
 
