@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { v2 as cloudinary } from 'cloudinary';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+// Configure Cloudinary if credentials are available
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+}
 
 export async function POST(request: NextRequest) {
     const data = await request.formData();
@@ -14,18 +24,48 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        // If we have a Vercel Blob token, use it (Production)
+        // Priority 1: Try Vercel Blob (Production)
         if (process.env.BLOB_READ_WRITE_TOKEN) {
-            const blob = await put(file.name, file, {
-                access: 'public',
-            });
-            return NextResponse.json({
-                success: true,
-                url: blob.url
-            });
+            try {
+                const blob = await put(file.name, file, {
+                    access: 'public',
+                });
+                return NextResponse.json({
+                    success: true,
+                    url: blob.url
+                });
+            } catch (blobError) {
+                console.error('Vercel Blob upload failed, trying Cloudinary:', blobError);
+                // Fall through to Cloudinary
+            }
         }
 
-        // Fallback to local storage for local development
+        // Priority 2: Try Cloudinary (if configured)
+        if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+            try {
+                const bytes = await file.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                
+                // Convert file to base64 for Cloudinary
+                const base64 = buffer.toString('base64');
+                const dataURI = `data:${file.type};base64,${base64}`;
+
+                const result = await cloudinary.uploader.upload(dataURI, {
+                    folder: 'nft-marketplace',
+                    resource_type: 'auto',
+                });
+
+                return NextResponse.json({
+                    success: true,
+                    url: result.secure_url
+                });
+            } catch (cloudinaryError) {
+                console.error('Cloudinary upload failed, trying local storage:', cloudinaryError);
+                // Fall through to local storage
+            }
+        }
+
+        // Priority 3: Fallback to local storage for local development
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const filename = `${Date.now()}-${file.name.replace(/\s/g, '-')}`;
@@ -40,6 +80,9 @@ export async function POST(request: NextRequest) {
         });
     } catch (error) {
         console.error('Upload error:', error);
-        return NextResponse.json({ success: false, message: 'Upload failed' }, { status: 500 });
+        return NextResponse.json({ 
+            success: false, 
+            message: error instanceof Error ? error.message : 'Upload failed' 
+        }, { status: 500 });
     }
 }
