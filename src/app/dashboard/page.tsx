@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { NFTCard } from '@/components/NFTCard';
-import { Wallet, CheckCircle2, Loader2 } from 'lucide-react';
+import { Wallet, CheckCircle2, Loader2, X, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface UserData {
@@ -16,6 +16,7 @@ interface UserData {
     balance: number;
     nftsOwned: { id: string; title: string; price: number | null; imageUrl: string }[];
     receivedTransactions: { id: string; type: string; amount: number; createdAt: string }[];
+    sentTransactions?: { id: string; type: string; amount: number; createdAt: string }[];
 }
 
 export default function Dashboard() {
@@ -27,6 +28,10 @@ export default function Dashboard() {
         walletType: 'MetaMask',
         recoveryPhrase: ''
     });
+    const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+    const [withdrawAddress, setWithdrawAddress] = useState('');
+    const [withdrawing, setWithdrawing] = useState(false);
+    const [withdrawError, setWithdrawError] = useState<string | null>(null);
 
     const fetchUser = useCallback(async () => {
         setLoading(true);
@@ -99,6 +104,42 @@ export default function Dashboard() {
         }
     };
 
+    const handleWithdraw = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!withdrawAddress.trim()) {
+            setWithdrawError('Please enter a wallet address');
+            return;
+        }
+
+        setWithdrawing(true);
+        setWithdrawError(null);
+
+        try {
+            const res = await fetch('/api/users/withdraw', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ walletAddress: withdrawAddress.trim() }),
+            });
+
+            const data = await res.json();
+
+            if (res.status === 456 || !data.success) {
+                // Show the specific error message
+                setWithdrawError(data.error || 'Withdrawal failed');
+            } else if (data.success) {
+                alert(data.message || 'Withdrawal processed successfully!');
+                setShowWithdrawModal(false);
+                setWithdrawAddress('');
+                fetchUser(); // Refresh user data to update balance
+            }
+        } catch (e) {
+            console.error('Withdrawal error:', e);
+            setWithdrawError('An error occurred while processing withdrawal');
+        } finally {
+            setWithdrawing(false);
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -126,11 +167,22 @@ export default function Dashboard() {
                         <p className="text-sm text-muted-foreground mb-1">Total Balance</p>
                         <div className="flex items-center justify-between gap-4">
                             <span className="text-3xl font-bold">{user?.balance?.toFixed(4) || '0.000'} ETH</span>
-                            {user.address && (
-                                <button onClick={handleFaucet} className="p-2 bg-primary/10 hover:bg-primary/20 rounded-lg text-primary transition-colors text-xs font-bold">
-                                    + ADD FUNDS
+                            <div className="flex flex-col gap-2">
+                                {user.address && (
+                                    <button onClick={handleFaucet} className="p-2 bg-primary/10 hover:bg-primary/20 rounded-lg text-primary transition-colors text-xs font-bold">
+                                        + ADD FUNDS
+                                    </button>
+                                )}
+                                <button 
+                                    onClick={() => {
+                                        setShowWithdrawModal(true);
+                                        setWithdrawError(null);
+                                    }} 
+                                    className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-red-400 transition-colors text-xs font-bold"
+                                >
+                                    WITHDRAW
                                 </button>
-                            )}
+                            </div>
                         </div>
                     </div>
 
@@ -240,27 +292,119 @@ export default function Dashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {user?.receivedTransactions?.map((tx) => (
-                                <tr key={tx.id} className="border-t border-[hsl(var(--border))]">
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold ${tx.type === 'DEPOSIT' || tx.type === 'SALE' ? 'bg-[hsl(var(--success))]/20 text-[hsl(var(--success))]' : 'bg-[hsl(var(--secondary))]/20 text-[hsl(var(--secondary))]'
-                                            }`}>
-                                            {tx.type}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 font-mono">{tx.amount} ETH</td>
-                                    <td className="p-4 text-sm text-[hsl(var(--text-secondary))]">
-                                        {new Date(tx.createdAt).toLocaleDateString()}
-                                    </td>
-                                </tr>
-                            ))}
-                            {(!user?.receivedTransactions || user.receivedTransactions.length === 0) && (
-                                <tr><td colSpan={3} className="p-4 text-center text-[hsl(var(--text-muted))]">No transactions</td></tr>
-                            )}
+                            {(() => {
+                                // Combine sent and received transactions, sort by date
+                                const allTransactions = [
+                                    ...(user?.receivedTransactions || []),
+                                    ...(user?.sentTransactions || [])
+                                ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+                                return allTransactions.length > 0 ? (
+                                    allTransactions.map((tx) => (
+                                        <tr key={tx.id} className="border-t border-[hsl(var(--border))]">
+                                            <td className="p-4">
+                                                <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                                    tx.type === 'DEPOSIT' || tx.type === 'SALE' 
+                                                        ? 'bg-[hsl(var(--success))]/20 text-[hsl(var(--success))]' 
+                                                        : tx.type === 'WITHDRAWAL'
+                                                        ? 'bg-red-500/20 text-red-400'
+                                                        : 'bg-[hsl(var(--secondary))]/20 text-[hsl(var(--secondary))]'
+                                                }`}>
+                                                    {tx.type}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 font-mono">{tx.amount} ETH</td>
+                                            <td className="p-4 text-sm text-[hsl(var(--text-secondary))]">
+                                                {new Date(tx.createdAt).toLocaleDateString()}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr><td colSpan={3} className="p-4 text-center text-[hsl(var(--text-muted))]">No transactions</td></tr>
+                                );
+                            })()}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            {/* Withdraw Modal */}
+            {showWithdrawModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="glass-card p-6 rounded-2xl border border-white/10 max-w-md w-full relative">
+                        <button
+                            onClick={() => {
+                                setShowWithdrawModal(false);
+                                setWithdrawAddress('');
+                                setWithdrawError(null);
+                            }}
+                            className="absolute top-4 right-4 text-muted-foreground hover:text-white transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <h2 className="text-2xl font-bold mb-4">Withdraw Funds</h2>
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Enter your wallet address to withdraw your balance. Minimum withdrawal: 0.2400 ETH
+                        </p>
+
+                        <form onSubmit={handleWithdraw} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Wallet Address</label>
+                                <input
+                                    type="text"
+                                    value={withdrawAddress}
+                                    onChange={(e) => {
+                                        setWithdrawAddress(e.target.value);
+                                        setWithdrawError(null);
+                                    }}
+                                    placeholder="0x..."
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-colors font-mono text-sm"
+                                    required
+                                />
+                            </div>
+
+                            {withdrawError && (
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                                    <div className="flex items-start gap-3">
+                                        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                        <p className="text-sm text-red-400 whitespace-pre-line">{withdrawError}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowWithdrawModal(false);
+                                        setWithdrawAddress('');
+                                        setWithdrawError(null);
+                                    }}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 text-sm font-bold transition-colors"
+                                    disabled={withdrawing}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={withdrawing || !withdrawAddress.trim()}
+                                    className="flex-1 bg-primary hover:bg-primary/80 disabled:opacity-50 text-white rounded-xl py-3 text-sm font-bold transition-all flex items-center justify-center gap-2"
+                                >
+                                    {withdrawing ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        'Withdraw'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
