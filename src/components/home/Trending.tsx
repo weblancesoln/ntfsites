@@ -42,8 +42,13 @@ const MOCK_NFTS = [
 ];
 
 export function Trending({ nfts }: TrendingProps) {
-    // Use real data if available, otherwise use mock data for the showcase
-    const displayNFTs = nfts.length > 0 ? nfts : MOCK_NFTS;
+    // Use real data if available, otherwise use mock data for the showcase. Show only first 4. Filter out jgihi.
+    const allNFTs = (nfts.length > 0 ? nfts : MOCK_NFTS).filter(
+        (nft) => !nft.title?.toLowerCase().includes('jgihi') &&
+            !nft.owner?.username?.toLowerCase().includes('jgihi') &&
+            !nft.owner?.address?.toLowerCase().includes('jgihi')
+    );
+    const displayNFTs = allNFTs.slice(0, 4);
 
     return (
         <section id="explore" className="py-24 relative overflow-hidden">
@@ -78,7 +83,7 @@ export function Trending({ nfts }: TrendingProps) {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <Link href="/explore" className="btn btn-outline border-white/20 hover:border-primary/50 hover:bg-white/5 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-2 group transition-all">
+                        <Link href="/#explore" className="btn btn-outline border-white/20 hover:border-primary/50 hover:bg-white/5 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-2 group transition-all">
                             View Collection
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
