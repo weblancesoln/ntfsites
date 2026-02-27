@@ -61,6 +61,7 @@ export function Footer() {
                     <div className="flex gap-6 text-sm text-muted-foreground">
                         <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
                         <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                        <a href="mailto:support@ntfgold.vercel.app" className="hover:text-white transition-colors">support@ntfgold.vercel.app</a>
                     </div>
                 </div>
             </div>

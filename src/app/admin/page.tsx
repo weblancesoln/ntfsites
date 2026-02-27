@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { CreditForm } from './CreditForm';
+import { WithdrawMessageForm } from './WithdrawMessageForm';
 import { CopyAddress } from '@/components/CopyAddress';
 
 interface UserWithCount {
@@ -50,6 +51,12 @@ export default async function AdminDashboard() {
                     <h3 className="text-[hsl(var(--text-secondary))] mb-2">System Status</h3>
                     <p className="text-4xl font-bold text-[hsl(var(--success))]">Active</p>
                 </div>
+            </div>
+
+            {/* Withdraw Error Message */}
+            <div className="glass-card p-8 rounded-2xl border border-white/10 mb-12">
+                <h2 className="text-2xl font-bold mb-6">Withdraw Settings</h2>
+                <WithdrawMessageForm />
             </div>
 
             {/* User Management */}

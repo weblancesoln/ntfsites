@@ -48,7 +48,7 @@ model NFT {
 
 model Transaction {
   id        String   @id @default(uuid())
-  type      String   // MINT, BUY, SELL, CREDIT
+  type      String   // MINT, BUY, SELL, CREDIT, WITHDRAWAL
   amount    Float
   createdAt DateTime @default(now())
 
@@ -60,4 +60,10 @@ model Transaction {
 
   nftId     String?
   nft       NFT?    @relation(fields: [nftId], references: [id])
+}
+
+model Setting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
 }
